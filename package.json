@@ -4,7 +4,8 @@
     "url": "https://github.com/ababilinski/com.babilinapps.realsense.downloader"
   },
   "dependencies": {
-    "com.unity.editorcoroutines": "1.0.0"
+    "com.unity.editorcoroutines": "1.0.0",
+    "com.unity.modules.unitywebrequest": "1.0.0"
   },
   "description": "Unofficial RealSense Package Downloader.\nA simple package that downloads the newest RealSense Unity Package from the Official Release Page.\n\n## Why was it created?\nI have been using the Intel RealSense SDK for a lot of my projects and wanted to have a way to download the RealSense package from the Unity Packages window. \n\n## How can the package be Improved?\nIdeally, this package would not be required and RealSense would update their repo to support the new Unity Package System. Until then, here are a list of item that still need to be done:\n- Use the GitHub API to download the package and release notes.\n- Show an update notification if the a new version was released.",
   "displayName": "Unofficial RealSense Downloader",
