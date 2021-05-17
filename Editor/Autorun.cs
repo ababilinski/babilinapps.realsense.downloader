@@ -24,7 +24,8 @@ namespace BabilinApps.RealSense.Downloader.Editor
         {
             if (!cachedAssemblyPathLoaded)
             {
-                _assemblyPath = EditorPrefs.GetString(REALSENSE_ASSEMBLY_PATH_KEY, "");
+                var projectPrefix = PlayerSettings.companyName + "." + PlayerSettings.productName;
+                _assemblyPath = EditorPrefs.GetString(projectPrefix+":"+REALSENSE_ASSEMBLY_PATH_KEY, "");
                 if (!string.IsNullOrWhiteSpace(_assemblyPath))
                 {
                     cachedAssemblyPathEmpty = false;
@@ -33,21 +34,21 @@ namespace BabilinApps.RealSense.Downloader.Editor
             }
 
             if (!cachedAssemblyPathEmpty && File.Exists(_assemblyPath))
-            {
+            { 
                 return;
             }
 
             var assembly = GetAssemblyByName(REALSENSE_ASSEMBLY_NAME);
             if (assembly != null)
-            {
-               
+            { 
+                var projectPrefix = PlayerSettings.companyName + "." + PlayerSettings.productName;
                 _assemblyPath = assembly.Location;
-                EditorPrefs.SetString(REALSENSE_ASSEMBLY_PATH_KEY, assembly.Location);
+                EditorPrefs.SetString(projectPrefix+":"+REALSENSE_ASSEMBLY_PATH_KEY, assembly.Location);
                 cachedAssemblyPathEmpty = false;
 
             }
             else
-            {
+            {   
                 if (!AssetDatabase.IsAssetImportWorkerProcess())
                 {
                     PackageDownloader.OpenPluginNotFoundOptions();
