@@ -6,9 +6,65 @@
 
 I have been using the Intel RealSense SDK for a lot of my projects and wanted to have a way to download the RealSense package from the Unity Packages window. 
 
+How to install the package
+--------------------------
+
+This package can be installed using the [scoped registry] feature
+Please add the following sections to the package manifest file
+(`Packages/manifest.json`).
+
+To the `scopedRegistries` section:
+
+```
+{
+  "name": "Unity NuGet",
+  "url": "https://unitynuget-registry.azurewebsites.net",
+  "scopes": [ "org.nuget" ]
+},
+{
+  "name": "babilinapps",
+  "url": "https://registry.npmjs.com",
+  "scopes": [ "babilinapps.realsense" ]
+}
+```
+
+To the `dependencies` section:
+
+```
+"babilinapps.realsense.downloader": "0.1.0",
+```
+
+After changes, the manifest file should look like below:
+
+```
+{
+  "scopedRegistries": [
+    {
+      "name": "Unity NuGet",
+      "url": "https://unitynuget-registry.azurewebsites.net",
+      "scopes": [ "org.nuget" ]
+    },
+    {
+	  "name": "babilinapps",
+	  "url": "https://registry.npmjs.com",
+	  "scopes": [ "babilinapps.realsense" ]
+	}
+  ],
+  "dependencies": {
+    "babilinapps.realsense.downloader": "0.1.0",
+...
+```
+
+[scoped registry]: https://docs.unity3d.com/Manual/upm-scoped.html
+ 
+
 ## How can the package be Improved?
 
 Ideally, this package would not be required and RealSense would update their repo to support the new Unity Package System. Until then, here are a list of item that still need to be done:
 - Use the GitHub API to download the package and release notes.
 - Show an update notification if the a new version was released.
 
+## Acknowledgements
+Thank you to **Keijiro Takahashikeijiro** ([@keijiro]) for your open source projects. The idea of adding this package to was based off of their project structure. 
+
+[@keijiro]: https://github.com/keijiro
