@@ -1,7 +1,7 @@
 {
   "author": {
     "name": "Adrian Babilinski",
-    "url": "https://github.com/ababilinski/com.babilinapps.realsense.downloader"
+    "url": "https://github.com/ababilinski/babilinapps.realsense.downloader"
   },
   "dependencies": {
     "com.unity.editorcoroutines": "1.0.0",
@@ -16,6 +16,6 @@
   "name": "babilinapps.realsense.downloader",
   "unity": "2019.1",
   "unityRelease": "0b5",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "tool"
 }
