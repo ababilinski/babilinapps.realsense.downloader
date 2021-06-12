@@ -8,19 +8,17 @@ I have been using the Intel RealSense SDK for a lot of my projects and wanted to
 
 How to install the package
 --------------------------
+1. This package can be installed by adding the Git url to the package manager
 
-This package can be installed using the [scoped registry] feature
-Please add the following sections to the package manifest file
-(`Packages/manifest.json`).
+2. This package can be installed using the [scoped registry] feature
+
+## Scoped Registry How To
+Please add the following sections to the package manifest file (`Packages/manifest.json`).
 
 To the `scopedRegistries` section:
 
 ```
-{
-  "name": "Unity NuGet",
-  "url": "https://unitynuget-registry.azurewebsites.net",
-  "scopes": [ "org.nuget" ]
-},
+
 {
   "name": "babilinapps",
   "url": "https://registry.npmjs.com",
@@ -40,15 +38,10 @@ After changes, the manifest file should look like below:
 {
   "scopedRegistries": [
     {
-      "name": "Unity NuGet",
-      "url": "https://unitynuget-registry.azurewebsites.net",
-      "scopes": [ "org.nuget" ]
-    },
-    {
 	  "name": "babilinapps",
 	  "url": "https://registry.npmjs.com",
 	  "scopes": [ "babilinapps.realsense" ]
-	}
+    }
   ],
   "dependencies": {
     "babilinapps.realsense.downloader": "0.1.0",
