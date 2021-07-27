@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
@@ -17,31 +16,12 @@ namespace BabilinApps.RealSense.Downloader.Editor
     internal static class Autorun
     {
         private const string REALSENSE_DLL_PATH_KEY = "REALSENSE_DLL_PATH";
-    
         private const string REALSENSE_DEFINES = "REALSENSE";
-
-
-
         private static bool cachedDllPathLoaded = false;
         private static bool cachedDllPathEmpty = true;
-
         private static string _dllPath = "";
-        public static string AbsolutePath
-        {
-            get
-            {
-                return "../" + Application.dataPath;
-            }
-        }
 
-        /// <summary>
-        /// Determines whether the specified file exists relative to the root project
-        /// </summary>
-        /// <returns></returns>
-        public static bool FileExistsInAbsolutePath(string path)
-        {
-            return File.Exists(AbsolutePath + path);
-        }
+
 
         /// <summary>
         /// Check if the current define symbols contain a definition
@@ -54,98 +34,81 @@ namespace BabilinApps.RealSense.Downloader.Editor
             return allDefines.Contains(symbol);
         }
 
-         /// <summary>
-    /// Add define symbols as soon as Unity gets done compiling.
-    /// </summary>
-    public static void AddDefineSymbols(string[] symbols)
-    {
-      string definesString =
-          PlayerSettings.GetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
-      List<string> allDefines = definesString.Split(';').ToList();
-      allDefines.AddRange(symbols.Except(allDefines));
-      PlayerSettings.SetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup,
-                                                       string.Join(";", allDefines.ToArray()));
-    }
 
-    /// <summary>
-    /// Remove define symbols as soon as Unity gets done compiling.
-    /// </summary>
-    public static void RemoveDefineSymbols(string[] symbols)
-    {
-      string definesString =
-          PlayerSettings.GetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
-      List<string> allDefines = definesString.Split(';').ToList();
-
-      for (int i = 0; i < symbols.Length; i++)
-      {
-        if (!allDefines.Contains(symbols[i]))
+        private static string EditorPrefKey
         {
-          Debug.LogWarning($"Remove Defines Ignored. Symbol [{symbols[i]}] does not exists.");
-
+            get
+            {
+                var projectKey = PlayerSettings.companyName + "." + PlayerSettings.productName;
+                var path = Path.GetFullPath(Application.dataPath);
+                return $"{REALSENSE_DLL_PATH_KEY}_[{projectKey}]-[{path}]";
+            }
         }
-        else
+        /// <summary>
+        /// Add define symbol as soon as Unity gets done compiling.
+        /// </summary>
+        public static void AddDefineSymbol(string symbol)
         {
-          allDefines.Remove(symbols[i]);
+            string definesString = PlayerSettings.GetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
+            List<string> allDefines = definesString.Split(';').ToList();
+            if (allDefines.Contains(symbol))
+            {
+                Debug.LogWarning($"Add Defines Ignored. Symbol [{symbol}] already exists.");
+                return;
+            }
+
+            allDefines.Add(symbol);
+            PlayerSettings.SetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup,
+                                                             string.Join(";", allDefines.ToArray()));
         }
 
-      }
-      PlayerSettings.SetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup,
-                                                       string.Join(";", allDefines.ToArray()));
-    }
-
-    /// <summary>
-    /// Add define symbol as soon as Unity gets done compiling.
-    /// </summary>
-    public static void AddDefineSymbol(string symbol)
-    {
-      string definesString = PlayerSettings.GetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
-      List<string> allDefines = definesString.Split(';').ToList();
-      if (allDefines.Contains(symbol))
-      {
-        Debug.LogWarning($"Add Defines Ignored. Symbol [{symbol}] already exists.");
-        return;
-      }
-
-      allDefines.Add(symbol);
-      PlayerSettings.SetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup,
-                                                       string.Join(";", allDefines.ToArray()));
-    }
-
-    /// <summary>
-    /// Remove define symbol as soon as Unity gets done compiling.
-    /// </summary>
-    public static void RemoveDefineSymbol(string symbol)
-    {
-      string definesString =
-          PlayerSettings.GetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
-      List<string> allDefines = definesString.Split(';').ToList();
-      if (!allDefines.Contains(symbol))
-      {
-        Debug.LogWarning($"Remove Defines Ignored. Symbol [{symbol}] does not exists.");
-
-      }
-      else
-      {
-        allDefines.Remove(symbol);
-
-        PlayerSettings.SetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup,
-                                                         string.Join(";", allDefines.ToArray()));
-      }
-
-    }
-
-
-        static Autorun()
+        /// <summary>
+        /// Remove define symbol as soon as Unity gets done compiling.
+        /// </summary>
+        public static void RemoveDefineSymbol(string symbol)
         {
-           
+            string definesString =
+                PlayerSettings.GetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup);
+            List<string> allDefines = definesString.Split(';').ToList();
+            if (!allDefines.Contains(symbol))
+            {
+                Debug.LogWarning($"Remove Defines Ignored. Symbol [{symbol}] does not exists.");
 
+            }
+            else
+            {
+                allDefines.Remove(symbol);
+
+                PlayerSettings.SetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup,
+                                                                 string.Join(";", allDefines.ToArray()));
+            }
+
+        }
+
+        static void OnEditorApplicationUpdate()
+        {
+          
+            var editorIsBusy = (AssetDatabase.IsAssetImportWorkerProcess() || EditorApplication.isCompiling || EditorApplication.isUpdating);
+            Debug.Log("editorIsBusy: " + editorIsBusy);
+            if (editorIsBusy)
+            {
+                return;
+            }
+
+            AskToDownload();
+            EditorApplication.update -= OnEditorApplicationUpdate;
+        }
+
+        static void AskToDownload()
+        {
+            if (!PackageDownloader.ShouldOpenDownloadWindow)
+            {
+                return;
+            }
             if (!cachedDllPathLoaded)
             {
-                var projectPrefix = PlayerSettings.companyName + "." + PlayerSettings.productName;
-                
-                _dllPath = EditorPrefs.GetString(projectPrefix + ":" + REALSENSE_DLL_PATH_KEY, "");
 
-
+                _dllPath = EditorPrefs.GetString(EditorPrefKey, "");
                 if (!string.IsNullOrWhiteSpace(_dllPath))
                 {
                     cachedDllPathEmpty = false;
@@ -196,26 +159,26 @@ namespace BabilinApps.RealSense.Downloader.Editor
                 }
             }
 
-
             if (hasFileAndSymbol)
-            { 
-                var projectPrefix = PlayerSettings.companyName + "." + PlayerSettings.productName;
-                EditorPrefs.SetString(projectPrefix+":"+ REALSENSE_DLL_PATH_KEY, _dllPath);
+            {
+                EditorPrefs.SetString(EditorPrefKey, _dllPath);
                 cachedDllPathEmpty = false;
 
             }
             else
-            {   
-                if (!AssetDatabase.IsAssetImportWorkerProcess())
-                {
-                    PackageDownloader.OpenPluginNotFoundOptions();
-                }
+            {
+                PackageDownloader.OpenPluginNotFoundOptions();
             }
-
-       
         }
 
-       
+        static Autorun()
+        {
+
+            EditorApplication.update += OnEditorApplicationUpdate;
+
+        }
+
+
     }
 
 }
